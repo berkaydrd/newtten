@@ -1,0 +1,128 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_application_newtten/firebase_options.dart';
+
+class RegisterView extends StatefulWidget {
+  const RegisterView({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _RegisterViewState createState() =>  _RegisterViewState();
+}
+
+class  _RegisterViewState extends State<RegisterView> {
+  late final TextEditingController _email;
+  late final TextEditingController _password;
+
+  @override
+  void initState() {
+    _email = TextEditingController();
+    _password = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: FutureBuilder(
+        future: Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        ), 
+        builder: (context, snapshot){
+          
+          switch (snapshot.connectionState){
+            case ConnectionState.done:
+              return Column(
+                children: [
+                  SizedBox(height: 40.0),
+                  Padding(//                          Email
+                    padding: const EdgeInsets.only( 
+                      top: 50.0,
+                      bottom: 10.0,
+                      right: 20.0,
+                      left: 20.0,
+                    ),
+                    child: TextField(
+                      controller: _email,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        hintText: 'Kullanıcı Adı',
+
+                        contentPadding: const EdgeInsets.symmetric( // Size of Container
+                          vertical: 10.0,
+                          horizontal: 30.0
+                        ),
+
+                        hintStyle: const TextStyle( // Text style
+                          fontSize: 15.0,
+                          color: Color.fromARGB(210, 128, 128, 128),
+                        ),
+                        
+                        filled: true, // Container color
+                        fillColor: const Color.fromARGB(100, 224, 224, 224),
+                        
+                        border: OutlineInputBorder( // Container border
+                          borderRadius: BorderRadius.circular(12.0),
+                          borderSide: const BorderSide(
+                            color: Colors.black,
+                            width: 1.0, 
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  TextField(
+                    controller: _password,
+                    obscureText: true,
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your password',
+                    ),
+                  ),
+                  TextButton(
+                      onPressed: () async{
+
+                        final email = _email.text;
+                        final password = _password.text;
+                        try {
+                          // ignore: unused_local_variable
+                          final userCredential = FirebaseAuth.instance.createUserWithEmailAndPassword(
+                            email: email, 
+                            password: password
+                          );
+                        }
+                        on FirebaseAuthException catch(e){
+                          if (e.code == 'weak-password'){
+                            print('Güçsüz Şifre');
+                          }
+                          else if (e.code == 'email-already-in-use'){
+                            print('Bu Mail Adresi Zaten Mevcut');
+                          }
+                          else if (e.code == 'invalid-email'){
+                            print('Mail Adresi Geçersiz');
+                          }
+                        }
+                      },
+                      child: const Text('Sign In'),
+                  ),
+                ],
+              );
+              default:
+                return const Text('Loading...');
+          }
+        },
+      ),
+    );
+  }
+}
