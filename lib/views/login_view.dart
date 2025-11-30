@@ -71,7 +71,7 @@ class _LoginViewState extends State<LoginView> {
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 hintText: 'Email',
-
+      
                 hintStyle: const TextStyle(
                   fontSize: 15.0,
                   color: Color.fromARGB(210, 128, 128, 128),
@@ -191,15 +191,18 @@ class _LoginViewState extends State<LoginView> {
           ),
           SizedBox(height: 8.0),
           TextButton(//                       NewAccount
-            onPressed: () {},
-
-            style: ButtonStyle(
+            onPressed: () {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/register/',
+                (route) => false,);
+            },
+      
+             style: ButtonStyle(
               foregroundColor: WidgetStatePropertyAll(Color.fromARGB(150, 0, 0, 0)),
               backgroundColor: WidgetStatePropertyAll(Color.fromARGB(200, 224, 224, 224)),
               overlayColor: WidgetStatePropertyAll(Colors.brown),
               minimumSize: WidgetStatePropertyAll(Size(364, 50))
             ), 
-
             child: const Text('Yeni Hesap Oluştur')
           )
         ],
