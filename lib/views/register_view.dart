@@ -1,5 +1,9 @@
+// ignore_for_file: unused_field
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_newtten/utilities/firestore_service.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -12,11 +16,13 @@ class RegisterView extends StatefulWidget {
 class  _RegisterViewState extends State<RegisterView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
-
+  late final TextEditingController _username;
+  
   @override
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
+    _username = TextEditingController();
     super.initState();
   }
 
@@ -24,18 +30,66 @@ class  _RegisterViewState extends State<RegisterView> {
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _username.dispose();
     super.dispose();
   }
   
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Hesap Oluştur',
+          style: TextStyle(
+            fontSize: 25.0,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        centerTitle: true,
+        elevation: 0.2,
+        shadowColor: Colors.black,
+      ),
       body: Column(
         children: [
           SizedBox(height: 40.0),
-          Padding(//                   Email
+          Padding(//                          Username
+            padding: const EdgeInsets.only(
+              top: 0.0,
+              bottom: 10.0,
+              right: 20.0,
+              left: 20.0,
+            ),
+            child: TextField(
+              controller: _username,
+              enableSuggestions: false,
+              autocorrect: false,
+              decoration: InputDecoration(
+                hintText: 'Kullanıcı Adı',
+                
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 10.0,
+                  horizontal: 30.0
+                ),
+                hintStyle: const TextStyle(
+                  fontSize: 15,
+                  color: Color.fromARGB(210, 128, 128, 128),
+                ),
+                
+                filled: true,
+                fillColor: const Color.fromARGB(100, 224, 224, 224),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: const BorderSide(
+                    color: Colors.black,
+                    width: 1.0,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(//                          Email
             padding: const EdgeInsets.only( 
-              top: 50.0,
+              top: 0.0,
               bottom: 10.0,
               right: 20.0,
               left: 20.0,
@@ -46,7 +100,7 @@ class  _RegisterViewState extends State<RegisterView> {
               autocorrect: false,
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
-                hintText: 'Kullanıcı Adı',
+                hintText: 'Email',
       
                 contentPadding: const EdgeInsets.symmetric( // Size of Container
                   vertical: 10.0,
@@ -71,26 +125,73 @@ class  _RegisterViewState extends State<RegisterView> {
               ),
             ),
           ),
-          TextField(
-            controller: _password,
-            obscureText: true,
-            enableSuggestions: false,
-            autocorrect: false,
-            decoration: const InputDecoration(
-              hintText: 'Enter your password',
+          Padding(//                          Password
+            padding: const EdgeInsets.only(
+              top: 0.0,
+              bottom: 0.0,
+              right: 20.0,
+              left: 20.0,
+            ),
+            child: TextField(
+              controller: _password,
+              obscureText: true,
+              enableSuggestions: false,
+              autocorrect: false,
+              decoration: InputDecoration(
+                hintText: 'Password',
+                
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 10.0,
+                  horizontal: 30.0
+                ),
+                hintStyle: const TextStyle(
+                  fontSize: 15,
+                  color: Color.fromARGB(210, 128, 128, 128),
+                ),
+                
+                filled: true,
+                fillColor: const Color.fromARGB(100, 224, 224, 224),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: const BorderSide(
+                    color: Colors.black,
+                    width: 1.0,
+                  ),
+                ),
+              ),
             ),
           ),
           TextButton(
               onPressed: () async{
       
-                final email = _email.text;
-                final password = _password.text;
+                final email = _email.text.trim();
+                final password = _password.text.trim();
+                final username = _username.text.trim();
+
+                final isAvailable = await FirestoreService.isUsernameAvailable(username);
+                
+                if (!isAvailable){
+                  print('Bu kullanıcı adı zaten alınmış. ');
+                  return;
+                }
                 try {
                   // ignore: unused_local_variable
-                  final userCredential = FirebaseAuth.instance.createUserWithEmailAndPassword(
+                  final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
                     email: email, 
                     password: password
                   );
+                  final uid = userCredential.user!.uid;
+                  await FirebaseFirestore.instance.collection('usernames').doc(username.toLowerCase()).set({
+                    'uid': uid,
+                    'username': username,
+                    'email': email,
+                  });
+                  if (mounted) {
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/verify_email/',
+                      (route) => false,
+                      );
+                  }
                 }
                 on FirebaseAuthException catch(e){
                   if (e.code == 'weak-password'){
