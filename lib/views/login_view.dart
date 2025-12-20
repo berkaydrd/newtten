@@ -140,12 +140,18 @@ class _LoginViewState extends State<LoginView> {
                     email: email,
                     password: password
                   );
+                  if (userCredential.user != null){
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/profile_page',
+                      (route) =>false
+                    );
+                  }
                 }
                 on FirebaseAuthException catch(e){
-                  if (e.code == 'User-not-found'){
+                  if (e.code == 'user-not-found'){
                     print('Kullanıcı Bulunamadı');
                   }
-                  else if (e.code == 'Wrong password'){
+                  else if (e.code == 'wrong password'){
                     print('Parola Yanlış');
                   }
                 }
@@ -194,7 +200,8 @@ class _LoginViewState extends State<LoginView> {
             onPressed: () {
               Navigator.of(context).pushNamedAndRemoveUntil(
                 '/register/',
-                (route) => false,);
+                (route) => false,
+              );
             },
       
              style: ButtonStyle(
