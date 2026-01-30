@@ -19,7 +19,7 @@ class PeriodButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2.7, vertical: 7.0),
+      padding: const EdgeInsets.symmetric(horizontal: 1.1, vertical: 7.0),
       child: TextButton(
         onPressed: () => onSelected(period), 
         style: TextButton.styleFrom(

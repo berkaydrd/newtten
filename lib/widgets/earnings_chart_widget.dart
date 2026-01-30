@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter_application_newtten/widgets/period_button.dart';
+import 'package:flutter_application_newtten/widgets/period_button_widget.dart';
 
 final List<FlSpot> defaultChartData = const [
   FlSpot(0, 3), 
